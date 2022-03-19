@@ -15,10 +15,16 @@ init
 		vars.Log("Loading autosplitter...");
 		// Singletons
 		var _singletonNoEdits = helper.GetClass("MagicLib", "SingletonNoEdit`1");
+		var _singletonMagic = helper.GetClass("MagicLib", "SingletonMagic`1");
 
 		#region Loading
 		var _loadingScreen = helper.GetClass("MagicUI", "LoadingScreen", 1);
 		vars.Unity.Make<bool>(_loadingScreen.Static, _singletonNoEdits["_instance"], _loadingScreen["isHiden"]).Name = "loadingScreenHidden";
+		#endregion
+
+		#region NewRun
+		var _levelManager = helper.GetClass("MDS.MagicRoomEditor", "LevelManager", 1);
+		vars.Unity.Make<bool>(_levelManager.Static, _singletonMagic["_instance"], _levelManager["isNewRun"]).Name = "isNewRun";
 		#endregion
 
 		return true;
@@ -32,12 +38,18 @@ update
 	if (!vars.Unity.Loaded) return false;
 	vars.Unity.Update();
 
+	current.IsNewRun = vars.Unity["isNewRun"].Current;
 	current.Loading = !(vars.Unity["loadingScreenHidden"].Current);
 }
 
 isLoading
 {
 	return current.Loading;
+}
+
+start
+{
+	return current.IsNewRun;
 }
 
 exit
