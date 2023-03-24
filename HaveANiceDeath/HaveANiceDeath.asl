@@ -1,50 +1,36 @@
 // Starting framework written by Ero#1111
 
-state("HaveANiceDeath") {}
+state("HaveaNiceDeath") {}
 
 startup
 {
 	vars.Log = (Action<object>)(output => print("[HaND Splitter] " + output));
-	vars.Unity = Assembly.Load(File.ReadAllBytes(@"Components\UnityASL.bin")).CreateInstance("UnityASL.Unity");
+	Assembly.Load(File.ReadAllBytes(@"Components/asl-help")).CreateInstance("Unity");
 }
 
 init
 {
-	vars.Unity.TryOnLoad = (Func<dynamic, bool>)(helper =>
+	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono =>
 	{
 		vars.Log("Loading autosplitter...");
-		// Singletons
-		var _singletonNoEdits = helper.GetClass("MagicLib", "SingletonNoEdit`1");
-		var _singletonMagic = helper.GetClass("MagicLib", "SingletonMagic`1");
 
 		#region Loading
-		var _loadingScreen = helper.GetClass("MagicUI", "LoadingScreen", 1);
-		vars.Unity.Make<bool>(_loadingScreen.Static, _singletonNoEdits["_instance"], _loadingScreen["isHiden"]).Name = "loadingScreenHidden";
+		var _loadingScreen = mono["MagicUI", "LoadingScreen", 1];
+		vars.Helper["NotLoading"] = mono.Make<bool>(_loadingScreen, "_instance", "isHiden");
 		#endregion
 
 		#region NewRun
-		var _levelManager = helper.GetClass("MDS.MagicRoomEditor", "LevelManager", 1);
-		vars.Unity.Make<bool>(_levelManager.Static, _singletonMagic["_instance"], _levelManager["isNewRun"]).Name = "isNewRun";
+		var _levelManager = mono["MDS.MagicRoomEditor", "LevelManager", 1];
+		vars.Helper["IsNewRun"] = mono.Make<bool>(_levelManager, "_instance", "isNewRun");
 		#endregion
 
 		return true;
 	});
-
-	vars.Unity.Load(game);
-}
-
-update
-{
-	if (!vars.Unity.Loaded) return false;
-	vars.Unity.Update();
-
-	current.IsNewRun = vars.Unity["isNewRun"].Current;
-	current.Loading = !(vars.Unity["loadingScreenHidden"].Current);
 }
 
 isLoading
 {
-	return current.Loading;
+	return !current.NotLoading;
 }
 
 start
